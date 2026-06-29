@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InTrack – Applications</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">🎯 InTrack</div>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="applications.html" class="active">Applications</a>
+      <a href="add.html">+ Add New</a>
+    </div>
+    <button class="btn btn-sm" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="container">
+    <h1 class="page-title">All Applications</h1>
+
+    <div class="filter-bar">
+      <input type="text" id="search-input" placeholder="🔍 Search company or role..." oninput="renderTable()"/>
+      <select id="filter-status" onchange="renderTable()">
+        <option value="">All Statuses</option>
+        <option value="Applied">Applied</option>
+        <option value="Shortlisted">Shortlisted</option>
+        <option value="Interview">Interview</option>
+        <option value="Offer">Offer</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+
+    <div class="section-card">
+      <div class="table-header">
+        <h2 class="section-title" style="margin:0;">Applications</h2>
+        <span class="count-badge" id="count-badge">0 entries</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company & Role</th>
+              <th>Date Applied</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="app-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <div class="icon">📋</div>
+        <p>No applications found.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    checkAuth();
+    renderTable();
+
+    function renderTable() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const filter = document.getElementById('filter-status').value;
+      const apps   = getApps();
+      const tbody  = document.getElementById('app-tbody');
+      const empty  = document.getElementById('empty-state');
+      const badge  = document.getElementById('count-badge');
+
+      let filtered = apps.filter(a => {
+        const matchS = a.company.toLowerCase().includes(search) || a.role.toLowerCase().includes(search);
+        const matchF = !filter || a.status === filter;
+        return matchS && matchF;
+      });
+
+      badge.textContent = `${filtered.length} entr${filtered.length === 1 ? 'y' : 'ies'}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = filtered.map((a, i) => `
+        <tr>
+          <td style="color:var(--muted);font-size:0.8rem;">${i+1}</td>
+          <td>
+            <div style="font-weight:600;">${a.company}</div>
+            <div style="font-size:0.8rem;color:var(--muted);">${a.role}</div>
+          </td>
+          <td style="font-size:0.82rem;color:var(--muted);">${formatDate(a.date)}</td>
+          <td style="font-size:0.82rem;color:var(--muted);">${a.source || '—'}</td>
+          <td>
+            <select class="status-select" onchange="updateStatus(${a.id}, this.value)">
+              ${['Applied','Shortlisted','Interview','Offer','Rejected'].map(s =>
+                `<option value="${s}" ${a.status===s?'selected':''}>${s}</option>`
+              ).join('')}
+            </select>
+          </td>
+          <td>
+            <button class="action-btn delete-btn" onclick="deleteApp(${a.id})">✕ Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateStatus(id, newStatus) {
+      let apps = getApps();
+      const app = apps.find(a => a.id === id);
+      if (app) { app.status = newStatus; saveApps(apps); showToast('Status updated!'); renderTable(); }
+    }
+
+    function deleteApp(id) {
+      let apps = getApps().filter(a => a.id !== id);
+      saveApps(apps);
+      showToast('Application removed.');
+      renderTable();
+    }
+  </script>
+</body>
+</html>

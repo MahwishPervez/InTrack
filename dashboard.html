@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InTrack – Dashboard</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">🎯 InTrack</div>
+    <div class="nav-links">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="applications.html">Applications</a>
+      <a href="add.html">+ Add New</a>
+    </div>
+    <button class="btn btn-sm" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="container">
+    <h1 class="page-title">Dashboard</h1>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="num" id="stat-total">0</div>
+        <div class="label">Total Applied</div>
+      </div>
+      <div class="stat-card shortlisted">
+        <div class="num" id="stat-shortlisted">0</div>
+        <div class="label">Shortlisted</div>
+      </div>
+      <div class="stat-card interview">
+        <div class="num" id="stat-interview">0</div>
+        <div class="label">Interviews</div>
+      </div>
+      <div class="stat-card offer">
+        <div class="num" id="stat-offer">0</div>
+        <div class="label">Offers</div>
+      </div>
+      <div class="stat-card rejected">
+        <div class="num" id="stat-rejected">0</div>
+        <div class="label">Rejected</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2 class="section-title">Recent Applications</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <div class="icon">📋</div>
+        <p>No applications yet. <a href="add.html">Add your first one!</a></p>
+      </div>
+      <div style="margin-top:16px;">
+        <a href="applications.html" class="btn btn-outline">View All Applications →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    checkAuth();
+    const apps = getApps();
+    updateStats(apps);
+    const recent = apps.slice(0, 5);
+    const tbody = document.getElementById('recent-tbody');
+    const empty = document.getElementById('empty-state');
+    if (recent.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      tbody.innerHTML = recent.map((a, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td><strong>${a.company}</strong></td>
+          <td>${a.role}</td>
+          <td>${formatDate(a.date)}</td>
+          <td>${statusBadge(a.status)}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

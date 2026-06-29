@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InTrack – Add Application</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">🎯 InTrack</div>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="applications.html">Applications</a>
+      <a href="add.html" class="active">+ Add New</a>
+    </div>
+    <button class="btn btn-sm" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="container">
+    <h1 class="page-title">Add New Application</h1>
+
+    <div class="section-card" style="max-width:600px;">
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input type="text" id="inp-company" placeholder="e.g. Google, IIT Patna IC"/>
+      </div>
+      <div class="form-group">
+        <label>Role / Position *</label>
+        <input type="text" id="inp-role" placeholder="e.g. Frontend Development Intern"/>
+      </div>
+      <div class="form-group">
+        <label>Date Applied *</label>
+        <input type="date" id="inp-date"/>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="inp-status">
+          <option value="Applied">Applied</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Source / Platform</label>
+        <input type="text" id="inp-source" placeholder="e.g. LinkedIn, Internshala, College Portal"/>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="inp-notes" placeholder="Any additional notes..."/>
+      </div>
+      <p class="error-msg" id="form-error">⚠ Please fill in Company, Role, and Date.</p>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addApp()">Save Application</button>
+        <button class="btn btn-outline" onclick="window.location.href='applications.html'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    checkAuth();
+    document.getElementById('inp-date').valueAsDate = new Date();
+
+    function addApp() {
+      const company = document.getElementById('inp-company').value.trim();
+      const role    = document.getElementById('inp-role').value.trim();
+      const date    = document.getElementById('inp-date').value;
+      const status  = document.getElementById('inp-status').value;
+      const source  = document.getElementById('inp-source').value.trim();
+      const notes   = document.getElementById('inp-notes').value.trim();
+      const err     = document.getElementById('form-error');
+
+      if (!company || !role || !date) { err.style.display='block'; return; }
+      err.style.display = 'none';
+
+      let apps = getApps();
+      apps.unshift({ id: Date.now(), company, role, date, status, source, notes });
+      saveApps(apps);
+      showToast('✅ Application saved!');
+      setTimeout(() => window.location.href = 'applications.html', 1000);
+    }
+  </script>
+</body>
+</html>
